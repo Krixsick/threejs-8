@@ -4,14 +4,12 @@ import {
   PresentationControls,
   useGLTF,
   Center,
+  OrbitControls,
 } from "@react-three/drei";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
-import gsap from "gsap";
-import * as THREE from "three";
 
 export function Product() {
-  const { scene, materials, animations } = useGLTF("/SportsCar.glb");
-  console.log(materials, animations);
+  const { scene, materials } = useGLTF("/SportsCar.glb");
+  console.log(materials);
   return <primitive object={scene}></primitive>;
 }
 
@@ -24,18 +22,28 @@ export function ProductPage() {
     { name: "Pearl White", color: "#ffffff" },
   ];
 
-  // const groupRef = useRef();
-
   return (
     <>
-      <div className="w-screen h-screen ">
-        <Canvas camera={{ position: [3, 2, 5], fov: 50 }}>
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[10, 10, 5]} intensity={1.5} />
-          <Environment preset="sunset" />
-          <Center>
-            <Product />
-          </Center>
+      <div className="w-screen h-screen relative">
+        {/* Left Side */}
+        <div className="absolute top-1/3 left-8 max-w-xs">
+          <p>2025 Model</p>
+          <p>Sport GT</p>
+          <p>
+            Experience pure performance with our flagship sports car. Twin-turbo
+            engine, adaptive suspension, and head-turning design.
+          </p>
+          <p>$89,900</p>
+        </div>
+        {/* Right Side */}
+        <div className="absolute top-1/3 right-8">
+          <p>EXTERIOR</p>
+          <p>selected colour</p>
+        </div>
+        <Canvas camera={{ position: [1, 1, 5], fov: 70 }}>
+          <Environment preset="city" />
+          <Product></Product>
+          <OrbitControls />
         </Canvas>
       </div>
     </>
