@@ -5,6 +5,7 @@ import {
   useGLTF,
   Center,
   OrbitControls,
+  ContactShadows,
 } from "@react-three/drei";
 import { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
@@ -27,6 +28,7 @@ export function Product({ color }: { color: string }) {
       );
     }
   }, [color]); // <-- Reruns when color changes
+
   return (
     <primitive
       ref={meshRef}
@@ -120,6 +122,7 @@ export function ProductPage() {
         </div>
         <Canvas camera={{ position: [5, 3, 3], fov: 50 }}>
           <Environment preset="city" />
+
           <PresentationControls
             global
             polar={[-0.9, 0.9]} // Almost no up/down tilt
@@ -128,6 +131,13 @@ export function ProductPage() {
             snap // Returns to original position on release
           >
             <Product color={selectedCarColour.color} />
+            <ContactShadows
+              position={[0, 0, 0]}
+              opacity={0.5}
+              scale={10}
+              blur={1.5}
+              far={0.8}
+            />
           </PresentationControls>
         </Canvas>
       </div>
