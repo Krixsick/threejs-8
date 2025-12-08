@@ -6,15 +6,35 @@ import {
   Center,
   OrbitControls,
 } from "@react-three/drei";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
+import gsap from "gsap";
 
 export function Product({ color }: { color: string }) {
+  const meshRef = useRef<THREE.Group>(null!);
   const { scene, materials } = useGLTF("/SportsCar.glb");
   if (color) {
     (materials["White"] as THREE.MeshStandardMaterial).color.set(color);
   }
-  return <primitive object={scene} position={[1, 0, 0]}></primitive>;
+
+  useEffect(() => {
+    if (meshRef.current) {
+      // 1. Flash/Pulse animation on Y-axis
+      gsap.fromTo(
+        meshRef.current.position,
+        { y: 0.2, duration: 0.2 }, // Start slightly elevated
+        { y: 0, duration: 0.5, ease: "bounce.out" } // Snap back to ground
+      );
+    }
+  }, [color]); // <-- Reruns when color changes
+  return (
+    <primitive
+      ref={meshRef}
+      className="z-10"
+      object={scene}
+      position={[1, 0, 0]}
+    ></primitive>
+  );
 }
 
 export function ProductPage() {
@@ -26,12 +46,33 @@ export function ProductPage() {
     { name: "White", color: "#ffffff" },
   ];
   const [selectedCarColour, setSelectedCarColour] = useState(colour_options[0]);
+  const leftRef = useRef(null); // Ref for the left UI panel
+  const rightRef = useRef(null); // Ref for the right UI panel
 
+  // --- GSAP PAGE LOAD ANIMATION ---
+  useEffect(() => {
+    // Animate the left panel
+    gsap.fromTo(
+      leftRef.current,
+      { opacity: 0, x: -50 }, // Start off-screen to the left
+      { opacity: 1, x: 0, duration: 1.2, ease: "power3.out" }
+    );
+
+    // Animate the right panel
+    gsap.fromTo(
+      rightRef.current,
+      { opacity: 0, x: 50 }, // Start off-screen to the right
+      { opacity: 1, x: 0, duration: 1.2, ease: "power3.out", delay: 0.3 } // Add a slight delay
+    );
+  }, []); // <-- Empty array means it runs once on mount
   return (
     <>
       <div className="w-screen h-screen relative ">
         {/* Left Side */}
-        <div className="absolute top-1/4 left-12 z-10 text-white max-w-sm pointer-events-none">
+        <div
+          ref={leftRef}
+          className="absolute top-1/4 left-12 z-1 text-white max-w-sm pointer-events-none"
+        >
           <p className="text-sm tracking-widest text-zinc-400 mb-2">
             2025 MODEL
           </p>
@@ -51,11 +92,14 @@ export function ProductPage() {
           </button>
         </div>
         {/* Right Side */}
-        <div className="absolute top-1/4 right-8 z-10 text-white w-35 pointer-events-none">
+        <div
+          ref={rightRef}
+          className="absolute top-1/4 right-8 z-10 text-white w-35 pointer-events-none"
+        >
           <p className="text-sm font-medium tracking-widest text-zinc-400 mb-2">
             EXTERIOR
           </p>
-          <p className="text-xl font-semibold mb-6 h-7">
+          <p className="text-xl text-black font-semibold mb-6 h-7">
             {selectedCarColour?.name || "White"}
           </p>
           <div className="flex flex-col gap-3">
@@ -78,7 +122,7 @@ export function ProductPage() {
           <Environment preset="city" />
           <PresentationControls
             global
-            polar={[-0.1, 0.1]} // Almost no up/down tilt
+            polar={[-0.9, 0.9]} // Almost no up/down tilt
             azimuth={[-Math.PI / 4, Math.PI / 4]} // Limited left/right (45° each way)
             config={{ mass: 2, tension: 400, friction: 26 }} // Heavier, smoother feel
             snap // Returns to original position on release
